@@ -1,0 +1,20 @@
+<Project Sdk="Microsoft.NET.Sdk">
+  <PropertyGroup>
+    <RootNamespace>Plugins</RootNamespace>
+    <AssemblyName>ContinuousLowRes</AssemblyName>
+    <TargetFramework>net9.0</TargetFramework>
+    <Description>Agent DVR plugin: continuous low-resolution recording alongside high-resolution event recording on the same camera</Description>
+    <GeneratePackageOnBuild>false</GeneratePackageOnBuild>
+    <AssemblyVersion>1.0.0.0</AssemblyVersion>
+    <FileVersion>1.0.0.0</FileVersion>
+    <!-- Agent DVR loads the plugin from Plugins/ContinuousLowRes/ContinuousLowRes.dll -->
+    <CopyLocalLockFileAssemblies>true</CopyLocalLockFileAssemblies>
+  </PropertyGroup>
+  <ItemGroup>
+    <PackageReference Include="Microsoft.CSharp" Version="4.7.0" />
+  </ItemGroup>
+  <ItemGroup>
+    <EmbeddedResource Include="json\config_en.json" />
+  </ItemGroup>
+  <Import Project="..\PluginUtils\PluginUtils.projitems" Label="Shared" />
+</Project>

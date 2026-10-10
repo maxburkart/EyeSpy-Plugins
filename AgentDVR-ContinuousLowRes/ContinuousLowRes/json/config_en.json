@@ -1,0 +1,256 @@
+{
+  "header": "Continuous Low-Res",
+  "okResult": "UploadJSON",
+  "name": "EditPluginConfiguration",
+  "origin": "Plugin",
+  "version": "VERSION",
+  "sections": [
+    {
+      "header": "General",
+      "displayType": "Form",
+      "items": [
+        {
+          "text": "How it works",
+          "value": "Records this camera's <b>low-res stream 24/7</b> in short segments while Agent keeps recording <b>high-res clips on motion</b> from the Record URL. Set Agent's recording mode to <i>Raw Record</i> with the main stream as Record URL; this plugin handles the continuous part.",
+          "type": "Info"
+        },
+        {
+          "text": "Status",
+          "value": "",
+          "type": "Info",
+          "bindto": "Status"
+        },
+        {
+          "text": "Enabled",
+          "value": true,
+          "type": "Boolean",
+          "bindto": "Enabled",
+          "live": true
+        },
+        {
+          "text": "Mode",
+          "value": "auto",
+          "type": "Select",
+          "bindto": "Mode",
+          "help": "Copy: saves the sub-stream as-is (near-zero CPU, needs its URL). Encode: re-encodes the frames Agent already decodes from the Live URL (works with any camera, uses CPU). Auto: copy when a URL is known, otherwise encode.",
+          "options": [
+            { "text": "Auto", "value": "auto" },
+            { "text": "Copy sub-stream (lowest CPU)", "value": "copy" },
+            { "text": "Encode Agent's live frames", "value": "encode" }
+          ]
+        },
+        {
+          "text": "Show status",
+          "type": "ButtonFA",
+          "icon": "fa-circle-info",
+          "action": "plugincommand",
+          "command": "status",
+          "help": "Also available over the API: command.cgi?cmd=plugincommand&ot=2&oid=[camera id]&command=status (or start, stop, restart, detect, cleanup)"
+        },
+        {
+          "text": "Restart recorder",
+          "type": "ButtonFA",
+          "icon": "fa-rotate-right",
+          "action": "plugincommand",
+          "command": "restart"
+        }
+      ]
+    },
+    {
+      "header": "Source",
+      "displayType": "Form",
+      "items": [
+        {
+          "text": "Sub-stream URL",
+          "value": "",
+          "type": "String",
+          "bindto": "SourceUrl",
+          "help": "The camera's low-res stream, usually the same as Agent's Live URL, with credentials, e.g. rtsp://user:pass@192.168.1.20:554/Streaming/Channels/102. Leave blank to try reading it from Agent (falls back to Encode mode if it can't)."
+        },
+        {
+          "text": "Find URL from Agent",
+          "type": "ButtonFA",
+          "icon": "fa-magnifying-glass",
+          "action": "plugincommand",
+          "command": "detect"
+        },
+        {
+          "text": "RTSP transport",
+          "value": "tcp",
+          "type": "Select",
+          "bindto": "RtspTransport",
+          "options": [
+            { "text": "TCP (recommended)", "value": "tcp" },
+            { "text": "UDP", "value": "udp" },
+            { "text": "FFmpeg default", "value": "auto" }
+          ]
+        },
+        {
+          "text": "Audio",
+          "value": "none",
+          "type": "Select",
+          "bindto": "Audio",
+          "help": "Copy mode only. Many cameras send G.711 audio that MP4 can't hold as-is; pick AAC if you want audio.",
+          "options": [
+            { "text": "No audio", "value": "none" },
+            { "text": "Convert to AAC", "value": "aac" },
+            { "text": "Copy as-is", "value": "copy" }
+          ]
+        }
+      ]
+    },
+    {
+      "header": "Encode mode",
+      "displayType": "Form",
+      "items": [
+        {
+          "text": "Max height",
+          "value": 480,
+          "type": "Int32",
+          "min": 120,
+          "max": 2160,
+          "bindto": "EncodeHeight",
+          "help": "Frames larger than this are scaled down; smaller ones are left alone."
+        },
+        {
+          "text": "Frame rate",
+          "value": 10,
+          "type": "Int32",
+          "min": 1,
+          "max": 30,
+          "bindto": "EncodeFps"
+        },
+        {
+          "text": "Quality (CRF, lower = better)",
+          "value": 28,
+          "type": "Slider",
+          "range": false,
+          "min": 18,
+          "max": 40,
+          "bindto": "EncodeQuality"
+        },
+        {
+          "text": "Encoder",
+          "value": "libx264",
+          "type": "String",
+          "bindto": "EncodeCodec",
+          "help": "libx264 by default. Hardware encoders such as h264_nvenc, h264_qsv or h264_vaapi use the bitrate below instead of CRF."
+        },
+        {
+          "text": "Bitrate (kbps, non-x264 encoders)",
+          "value": 512,
+          "type": "Int32",
+          "min": 64,
+          "max": 20000,
+          "bindto": "EncodeBitrateKbps"
+        }
+      ]
+    },
+    {
+      "header": "Storage",
+      "displayType": "Form",
+      "items": [
+        {
+          "text": "Segment length (minutes)",
+          "value": 15,
+          "type": "Int32",
+          "min": 1,
+          "max": 240,
+          "bindto": "SegmentMinutes",
+          "help": "Segments start on clock boundaries (e.g. :00, :15, :30, :45)."
+        },
+        {
+          "text": "Container",
+          "value": "fmp4",
+          "type": "Select",
+          "bindto": "Container",
+          "options": [
+            { "text": "MP4, crash-safe (fragmented)", "value": "fmp4" },
+            { "text": "MP4, standard", "value": "mp4" },
+            { "text": "MKV", "value": "mkv" }
+          ]
+        },
+        {
+          "text": "Add to Agent's recordings",
+          "value": true,
+          "type": "Boolean",
+          "bindto": "RegisterInAgent",
+          "help": "Each finished segment is moved into this camera's recordings so it shows in the timeline and Agent's storage management handles retention. Off = keep segments in the folder below and use the retention settings here."
+        },
+        {
+          "text": "Tags",
+          "value": "continuous",
+          "type": "String",
+          "bindto": "Tags",
+          "help": "Comma-separated tags added to every segment, so you can filter them apart from event recordings."
+        },
+        {
+          "text": "Tag segments that contain an event",
+          "value": true,
+          "type": "Boolean",
+          "bindto": "TagEventSegments",
+          "help": "Adds an 'event' tag (or '_event' to the file name when not added to Agent) if motion, an alert or a high-res recording happened during the segment."
+        },
+        {
+          "text": "Working / storage folder",
+          "value": "",
+          "type": "String",
+          "bindto": "OutputFolder",
+          "help": "Blank = [Agent media folder]/ContinuousLowRes. A sub-folder per camera is created inside."
+        },
+        {
+          "text": "Keep for (days)",
+          "value": 7,
+          "type": "Int32",
+          "min": 0,
+          "max": 3650,
+          "bindto": "RetentionDays",
+          "help": "Applies to files in the folder above (all of them when not adding to Agent; only leftovers when adding). 0 = forever."
+        },
+        {
+          "text": "Max folder size (GB)",
+          "value": 0,
+          "type": "Int32",
+          "min": 0,
+          "max": 100000,
+          "bindto": "MaxStorageGB",
+          "help": "Oldest segments are removed first. 0 = no limit."
+        },
+        {
+          "text": "Clean up now",
+          "type": "ButtonFA",
+          "icon": "fa-broom",
+          "action": "plugincommand",
+          "command": "cleanup"
+        }
+      ]
+    },
+    {
+      "header": "Advanced",
+      "displayType": "Form",
+      "items": [
+        {
+          "text": "FFmpeg path",
+          "value": "",
+          "type": "String",
+          "bindto": "FfmpegPath",
+          "help": "Full path to the ffmpeg executable (or its folder). Blank = look in Agent's folder, then on PATH."
+        },
+        {
+          "text": "Extra input arguments",
+          "value": "",
+          "type": "String",
+          "bindto": "ExtraInputArgs",
+          "help": "Inserted before -i, e.g. -fflags +genpts"
+        },
+        {
+          "text": "Extra output arguments",
+          "value": "",
+          "type": "String",
+          "bindto": "ExtraOutputArgs",
+          "help": "Inserted before the segment muxer, e.g. -tag:v hvc1 for H.265 cameras played in Safari"
+        }
+      ]
+    }
+  ]
+}
